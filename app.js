@@ -52,22 +52,54 @@ const utils = {
     main.innerHTML = content;
     document.querySelector(".btn-container").innerHTML = btn;
   },
+
+  handleEventMinutes: function () {
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
+      input.addEventListener("input", (e) => {
+        exercicesArray.map((exo) => {
+          if (exo.pic == e.target.id) {
+            exo.min = parseInt(e.target.value);
+            //verifie si l'input toucher donc e.target.id  est égale  à l'id  qui est 
+          }
+        });
+      });
+    });
+  },
 };
 
 const page = {
   lobby: function () {
+    let mapArray = exercicesArray
+      .map(
+        (exo) =>
+          `
+   <li>
+   <div class="card-header">
+   <input type='number' id ="${exo.pic}" min="1" max="10" value="${exo.min}">
+   <span>min</span>
+   </div>
+   <img src="./assets/img/${exo.pic}.png" />
+   <i class="fas fa-arrow-alt-circle-left arrow" data-pic=${exo.pic}></i>
+    <i class="fas fa-times-circle deleteBtn" data-pic=${exo.pic}></i>
+   </li>
+    
+    `
+      )
+      .join("");
+
     utils.pageContent(
       "Paramétrage <i id='reboot' class=' fas fa-undo'></i>",
-      "Exercices",
+      "<ul>" + mapArray + "</ul>",
       "<button id='start'>commencer<i class='far fa-play-circle'></i></button>"
     );
+    utils.handleEventMinutes();
   },
 
   routine: function () {
     utils.pageContent("Routine", "Exercice avec chrono", null);
   },
 
-  finishe: function () {
+  finish: function () {
     utils.pageContent(
       "c'est terminé !",
       "<button id='start'>Recommencer</button>",
