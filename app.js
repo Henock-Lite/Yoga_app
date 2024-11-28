@@ -1,6 +1,7 @@
 const main = document.querySelector("main");
 
-let exercicesArray = [
+const basicArray = [
+  //9 enleve les element sur exercicresArray stoke le sur basicArray
   {
     pic: 0,
     min: 1,
@@ -44,9 +45,24 @@ let exercicesArray = [
   },
 ];
 
+let exercicesArray = [];
+(() => {
+  //10
+
+  //une function qui se joue elle même une fois  au lancement de la page
+  if (localStorage.exercices) {
+    //recuperer les donnée du tableau une fois sur localstorage si il est true
+    exercicesArray =JSON.parse(localStorage.exercices);
+  } else {
+    exercicesArray = basicArray;
+    ///recuperer les donnée du tableau basicarray
+  }
+})();
+
 class Exercices {}
 
 const utils = {
+  //1
   pageContent: function (title, content, btn) {
     document.querySelector("h1").innerHTML = title;
     main.innerHTML = content;
@@ -54,20 +70,75 @@ const utils = {
   },
 
   handleEventMinutes: function () {
+    //5
+  
     document.querySelectorAll('input[type="number"]').forEach((input) => {
       input.addEventListener("input", (e) => {
         exercicesArray.map((exo) => {
           if (exo.pic == e.target.id) {
             exo.min = parseInt(e.target.value);
-            //verifie si l'input toucher donc e.target.id  est égale  à l'id  qui est 
+            this.store();
+            //verifie si l'input touchée  donc e.target.id  est égale  à l'id qui est actif donc exo.pic dans (exercicesArray)  si il est égale tu donne a exo.min la value de l'input touchée
           }
         });
       });
     });
   },
+
+  handleEventArrow: function () {
+    //6
+    //pour échanger  les carte sur le button arrow tout en s'assurant que la positionement doit être different de 0
+    document.querySelectorAll(".arrow").forEach((arrow) => {
+      arrow.addEventListener("click", (e) => {
+        let position = 0;
+        exercicesArray.map((exo) => {
+          if (exo.pic == e.target.dataset.pic && position !== 0) {
+            [exercicesArray[position], exercicesArray[position - 1]] = [
+              exercicesArray[position - 1],
+              exercicesArray[position],
+            ];
+            page.lobby();
+            this.store();
+          } else {
+            position++;
+          }
+        });
+      });
+    });
+  },
+
+  deleteItem: function () {
+    //7
+    document.querySelectorAll(".deleteBtn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        let newArr = [];
+        exercicesArray.map((exo) => {
+          if (exo.pic != e.target.dataset.pic) {
+            newArr.push(exo);
+          }
+        });
+        exercicesArray = newArr;
+        page.lobby();
+        this.store();
+      });
+    });
+  },
+
+  reboot: function () {
+    //8 recuperer les donnée du tableau basicArray
+    exercicesArray = basicArray;
+    page.lobby();
+    this.store();
+  },
+
+  store: function () {
+    // 11
+    localStorage.exercices = JSON.stringify(exercicesArray);
+  },
 };
 
 const page = {
+  //2
   lobby: function () {
     let mapArray = exercicesArray
       .map(
@@ -93,13 +164,19 @@ const page = {
       "<button id='start'>commencer<i class='far fa-play-circle'></i></button>"
     );
     utils.handleEventMinutes();
+    utils.handleEventArrow();
+    utils.deleteItem();
+    reboot.addEventListener("click", () => utils.reboot());
   },
 
   routine: function () {
+    //3
+  
     utils.pageContent("Routine", "Exercice avec chrono", null);
   },
 
   finish: function () {
+   //4
     utils.pageContent(
       "c'est terminé !",
       "<button id='start'>Recommencer</button>",
