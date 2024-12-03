@@ -52,14 +52,52 @@ let exercicesArray = [];
   //une function qui se joue elle même une fois  au lancement de la page
   if (localStorage.exercices) {
     //recuperer les donnée du tableau une fois sur localstorage si il est true
-    exercicesArray =JSON.parse(localStorage.exercices);
+    exercicesArray = JSON.parse(localStorage.exercices);
   } else {
     exercicesArray = basicArray;
     ///recuperer les donnée du tableau basicarray
   }
 })();
 
-class Exercices {}
+class Exercices {
+  constructor() {
+    this.index = 0;
+    this.minutes = exercicesArray[this.index].min;
+    this.seconds = 0;
+  }
+
+  updateCountdown() {
+    this.seconds = this.seconds < 10 ? "0" + this.seconds : this.seconds;
+
+    setTimeout(() => {
+      if (this.minutes === 0 && this.seconds == "00") {
+        this.index++;// Passe à l'exercice suivant
+        if (this.index < exercicesArray.length) {
+          this.minutes = exercicesArray[this.index].min;// Récupère les minutes du prochain exercice
+          this.seconds = 0;// Réinitialise les secondes
+          this.updateCountdown();//// Continue le décompte
+        } else {
+          return page.finish();
+        }
+      } else if (this.seconds === "00") {
+        this.minutes--;
+        this.seconds = 59;
+        this.updateCountdown();
+      } else {
+        this.seconds--;
+        this.updateCountdown();
+      }
+    }, 100);
+    return (main.innerHTML = `
+    <div class="exercice-container">
+    <p>${this.minutes}:${this.seconds}</p>
+    <img src="./assets/img/${exercicesArray[this.index].pic}.png" />
+    <div>${this.index + 1}/${exercicesArray.length}</div>
+    </div>
+    
+    `);
+  }
+}
 
 const utils = {
   //1
@@ -71,7 +109,7 @@ const utils = {
 
   handleEventMinutes: function () {
     //5
-  
+
     document.querySelectorAll('input[type="number"]').forEach((input) => {
       input.addEventListener("input", (e) => {
         exercicesArray.map((exo) => {
@@ -120,12 +158,13 @@ const utils = {
         exercicesArray = newArr;
         page.lobby();
         this.store();
+        // Le code filtre et ne conserve que les exercices qui ne correspondent pas au bouton cliqué.
       });
     });
   },
 
   reboot: function () {
-    //8 recuperer les donnée du tableau basicArray
+    //8 recuperer les données du tableau basicArray
     exercicesArray = basicArray;
     page.lobby();
     this.store();
@@ -167,16 +206,17 @@ const page = {
     utils.handleEventArrow();
     utils.deleteItem();
     reboot.addEventListener("click", () => utils.reboot());
+    start.addEventListener("click", () => this.routine());
   },
 
   routine: function () {
     //3
-  
-    utils.pageContent("Routine", "Exercice avec chrono", null);
+    const exercice = new Exercices();
+    utils.pageContent("Routine", exercice.updateCountdown(), null);
   },
 
   finish: function () {
-   //4
+    //4
     utils.pageContent(
       "c'est terminé !",
       "<button id='start'>Recommencer</button>",
